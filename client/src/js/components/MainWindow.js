@@ -9,10 +9,13 @@ function useClientID(userInfo) {
   const [clientID, setClientID] = useState('');
 
   useEffect(() => {
-    if (userInfo) {
-      setClientID(userInfo.name);
-      document.title = `${userInfo.name} - VideoCall`;
-      socket.emit('updateID', userInfo.name);  // Emit new ID to backend
+    // Retrieve the username from localStorage (if it exists)
+    const username = localStorage.getItem('username') || userInfo?.name;
+
+    if (username) {
+      setClientID(username);
+      document.title = `${username} - VideoCall`;
+      socket.emit('init', { username });  // Emit the username as an object
     } else {
       socket.on('init', ({ id }) => {
         setClientID(id);
@@ -46,7 +49,7 @@ function MainWindow({ startCall }) {
       updateClientID(userInfo.name);  // Update ID when component mounts with userInfo
       document.title = `${userInfo.name} - VideoCall`; // Ensure the document title is updated
     }
-  }, []);  // This effect runs only on component mount
+  }, [userInfo]);  // This effect runs only on component mount
 
   /**
    * Start the call with or without video
