@@ -22,22 +22,45 @@ const NavBar = () => {
   };
 
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-evenly', padding: '10px', background: '#f4f4f4', width: '120%', boxSizing: 'border-box', marginLeft:'-20px' }}>
-      <div style={{marginRight: '100px',paddingRight: '100px'}}>
+    <nav style={navStyles}>
+      <div style={navContentStyles}>
         {!userInfo ? (
           <>
-            <Link to="/login" style={{ margin: '0 10px' }}>Login</Link>
-            <Link to="/signup" style={{ margin: '0 10px' }}>Sign Up</Link>
+            <Link to="/login" style={linkStyles}>Login</Link>
+            <Link to="/signup" style={linkStyles}>Sign Up</Link>
           </>
         ) : (
           <>
             <span style={{ margin: '0 10px', color:'black' }}>Hi, {userInfo.name}</span> {/* Display user name */}
-            <button onClick={logoutHandler} style={{ margin: '0 10px' }}>Logout</button>
+            <button onClick={logoutHandler} style={linkStyles}>Logout</button>
           </>
         )}
       </div>
     </nav>
   );
+};
+
+// Styles for NavBar
+const navStyles = {
+  display: 'flex',
+  justifyContent: 'center', // Centering the content horizontally
+  padding: '10px 20px',
+  background: '#f4f4f4',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
+const navContentStyles = {
+  display: 'flex',
+  justifyContent: 'center', // Center the links
+  alignItems: 'center',
+  gap: '20px', // Spacing between the links
+};
+
+const linkStyles = {
+  margin: '0 10px',
+  textDecoration: 'none',
+  color: 'black',
 };
 
 class App extends Component {
