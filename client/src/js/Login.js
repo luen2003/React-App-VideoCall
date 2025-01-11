@@ -6,7 +6,7 @@ import { login } from './actions/userActions'; // Assuming the action for login
 const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
@@ -23,7 +23,7 @@ const Login = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(login(email, password)); // Dispatch login action
+    dispatch(login(name, password)); // Dispatch login action
   };
 
   const loginContainerStyle = {
@@ -106,18 +106,16 @@ const Login = () => {
           <h3 style={{ color: 'black', textAlign: 'center' }}>Log In</h3>
           <form onSubmit={submitHandler}>
             <div style={inputGroupStyle}>
-              <label htmlFor="email">Email</label>
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="Enter email"
+                placeholder="Enter username"
                 style={inputStyle}
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
+                onChange={(e) => setName(e.target.value)}
+                value={name}
               />
             </div>
             <div style={inputGroupStyle}>
-              <label htmlFor="password">Password</label>
               <input
                 type="password"
                 required

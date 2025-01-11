@@ -4,6 +4,41 @@ import { socket, PeerConnection } from './communication';
 import MainWindow from './components/MainWindow';
 import CallWindow from './components/CallWindow';
 import CallModal from './components/CallModal';
+import { Link } from 'react-router-dom';  // Import Link from react-router-dom
+import { useDispatch, useSelector } from 'react-redux';  // Import for Redux
+import { logout } from './actions/userActions';  // Import the logout action
+
+// Functional NavBar Component
+const NavBar = () => {
+  const dispatch = useDispatch();
+
+  // Get user login status
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  // Handle logout
+  const logoutHandler = () => {
+    dispatch(logout());
+  };
+
+  return (
+    <nav style={{ display: 'flex', justifyContent: 'space-evenly', padding: '10px', background: '#f4f4f4' }}>
+      <div>
+        {!userInfo ? (
+          <>
+            <Link to="/login" style={{ margin: '0 10px' }}>Login</Link>
+            <Link to="/signup" style={{ margin: '0 10px' }}>Sign Up</Link>
+          </>
+        ) : (
+          <>
+            <span style={{ margin: '0 10px', color:'black' }}>Hi, {userInfo.name}</span> {/* Display user name */}
+            <button onClick={logoutHandler} style={{ margin: '0 10px' }}>Logout</button>
+          </>
+        )}
+      </div>
+    </nav>
+  );
+};
 
 class App extends Component {
   constructor() {
@@ -13,7 +48,8 @@ class App extends Component {
       callModal: '',
       callFrom: '',
       localSrc: null,
-      peerSrc: null
+      peerSrc: null,
+      userName: '', // Added for managing display name
     };
     this.pc = {};
     this.config = null;
@@ -23,6 +59,12 @@ class App extends Component {
   }
 
   componentDidMount() {
+    // Get the user name from localStorage or Redux store for initialization
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+      this.setState({ userName }); // Set the user's name
+    }
+
     socket
       .on('request', ({ from: callFrom }) => {
         this.setState({ callModal: 'active', callFrom });
@@ -70,10 +112,14 @@ class App extends Component {
   }
 
   render() {
-    const { callFrom, callModal, callWindow, localSrc, peerSrc } = this.state;
+    const { callFrom, callModal, callWindow, localSrc, peerSrc, userName } = this.state;
     return (
       <div>
+        <NavBar />  {/* Add the NavBar here */}
         <MainWindow startCall={this.startCallHandler} />
+        <div>
+          {userName && <h3>Welcome, {userName}</h3>} {/* Display the user's name */}
+        </div>
         {!_.isEmpty(this.config) && (
           <CallWindow
             status={callWindow}
@@ -83,7 +129,7 @@ class App extends Component {
             mediaDevice={this.pc.mediaDevice}
             endCall={this.endCallHandler}
           />
-        ) }
+        )}
         <CallModal
           status={callModal}
           startCall={this.startCallHandler}
