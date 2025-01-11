@@ -29,7 +29,7 @@ const SignUp = () => {
     if (password !== confirmPassword) {
       setMessage('Passwords do not match');
     } else {
-      dispatch(register(name, email, password));
+      dispatch(register(name, password));
     }
   };
 
@@ -111,14 +111,7 @@ const SignUp = () => {
             style={inputStyle}
             onChange={(e) => setName(e.target.value)}
           />
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder="Enter your email"
-            style={inputStyle}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          
           <input
             type="password"
             name="password"
