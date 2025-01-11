@@ -1,22 +1,18 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { socket, PeerConnection } from './communication';
 import MainWindow from './components/MainWindow';
 import CallWindow from './components/CallWindow';
 import CallModal from './components/CallModal';
-import { Link } from 'react-router-dom';  // Import Link from react-router-dom
-import { useDispatch, useSelector } from 'react-redux';  // Import for Redux
-import { logout } from './actions/userActions';  // Import the logout action
+import { Link } from 'react-router-dom';  
+import { useDispatch, useSelector } from 'react-redux';  
+import { logout } from './actions/userActions';
 
-// Functional NavBar Component
 const NavBar = () => {
   const dispatch = useDispatch();
-
-  // Get user login status
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  // Handle logout
   const logoutHandler = () => {
     dispatch(logout());
   };
@@ -31,7 +27,7 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <span style={{ margin: '0 10px', color:'black' }}>Hi, {userInfo.name}</span> {/* Display user name */}
+            <span style={{ margin: '0 10px', color:'black' }}>Hi, {userInfo.name}</span> 
             <button onClick={logoutHandler} style={linkStyles}>Logout</button>
           </>
         )}
@@ -40,10 +36,9 @@ const NavBar = () => {
   );
 };
 
-// Styles for NavBar
 const navStyles = {
   display: 'flex',
-  justifyContent: 'center', // Centering the content horizontally
+  justifyContent: 'center', 
   padding: '10px 20px',
   background: '#f4f4f4',
   width: '100%',
@@ -52,9 +47,9 @@ const navStyles = {
 
 const navContentStyles = {
   display: 'flex',
-  justifyContent: 'center', // Center the links
+  justifyContent: 'center', 
   alignItems: 'center',
-  gap: '20px', // Spacing between the links
+  gap: '20px', 
 };
 
 const linkStyles = {
@@ -63,105 +58,108 @@ const linkStyles = {
   color: 'black',
 };
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      callWindow: '',
-      callModal: '',
-      callFrom: '',
-      localSrc: null,
-      peerSrc: null,
-      userName: '', // Added for managing display name
-    };
-    this.pc = {};
-    this.config = null;
-    this.startCallHandler = this.startCall.bind(this);
-    this.endCallHandler = this.endCall.bind(this);
-    this.rejectCallHandler = this.rejectCall.bind(this);
-  }
+const App = () => {
+  const [callWindow, setCallWindow] = useState('');
+  const [callModal, setCallModal] = useState('');
+  const [callFrom, setCallFrom] = useState('');
+  const [localSrc, setLocalSrc] = useState(null);
+  const [peerSrc, setPeerSrc] = useState(null);
+  const [userName, setUserName] = useState('');
 
-  componentDidMount() {
-    // Get the user name from localStorage or Redux store for initialization
-    const userName = localStorage.getItem('userName');
-    if (userName) {
-      this.setState({ userName }); // Set the user's name
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  let pc = {};  // Reference for PeerConnection
+  let config = null;  // Config for media options
+
+  useEffect(() => {
+    // Check if userName exists in localStorage and update state if so
+    const storedUserName = localStorage.getItem('userName');
+    if (storedUserName) {
+      setUserName(storedUserName);
     }
 
     socket
       .on('request', ({ from: callFrom }) => {
-        this.setState({ callModal: 'active', callFrom });
+        setCallModal('active');
+        setCallFrom(callFrom);
       })
       .on('call', (data) => {
         if (data.sdp) {
-          this.pc.setRemoteDescription(data.sdp);
-          if (data.sdp.type === 'offer') this.pc.createAnswer();
-        } else this.pc.addIceCandidate(data.candidate);
+          pc.setRemoteDescription(data.sdp);
+          if (data.sdp.type === 'offer') pc.createAnswer();
+        } else {
+          pc.addIceCandidate(data.candidate);
+        }
       })
-      .on('end', this.endCall.bind(this, false))
+      .on('end', endCall.bind(this, false))
       .emit('init');
-  }
+  }, []);
 
-  startCall(isCaller, friendID, config) {
+  useEffect(() => {
+    // When userInfo changes, update localStorage and userName state
+    if (userInfo && userInfo.name && userInfo.name !== userName) {
+      localStorage.setItem('userName', userInfo.name);
+      setUserName(userInfo.name);
+    }
+  }, [userInfo, userName]);
+
+  const startCall = (isCaller, friendID, config) => {
     this.config = config;
-    this.pc = new PeerConnection(friendID)
+    pc = new PeerConnection(friendID)
       .on('localStream', (src) => {
         const newState = { callWindow: 'active', localSrc: src };
         if (!isCaller) newState.callModal = '';
-        this.setState(newState);
+        setLocalSrc(src);
+        setCallWindow('active');
+        setCallModal('');
       })
-      .on('peerStream', (src) => this.setState({ peerSrc: src }))
+      .on('peerStream', (src) => setPeerSrc(src))
       .start(isCaller);
-  }
+  };
 
-  rejectCall() {
-    const { callFrom } = this.state;
+  const rejectCall = () => {
     socket.emit('end', { to: callFrom });
-    this.setState({ callModal: '' });
-  }
+    setCallModal('');
+  };
 
-  endCall(isStarter) {
-    if (_.isFunction(this.pc.stop)) {
-      this.pc.stop(isStarter);
+  const endCall = (isStarter) => {
+    if (_.isFunction(pc.stop)) {
+      pc.stop(isStarter);
     }
-    this.pc = {};
-    this.config = null;
-    this.setState({
-      callWindow: '',
-      callModal: '',
-      localSrc: null,
-      peerSrc: null
-    });
-  }
+    pc = {};
+    setConfig(null);
+    setCallWindow('');
+    setCallModal('');
+    setLocalSrc(null);
+    setPeerSrc(null);
+  };
 
-  render() {
-    const { callFrom, callModal, callWindow, localSrc, peerSrc, userName } = this.state;
-    return (
+  return (
+    <div>
+      <NavBar />
+      <MainWindow startCall={startCall} />
       <div>
-        <NavBar />  {/* Add the NavBar here */}
-        <MainWindow startCall={this.startCallHandler} />
-        <div>
-          {userName && <h3>Welcome, {userName}</h3>} {/* Display the user's name */}
-        </div>
-        {!_.isEmpty(this.config) && (
-          <CallWindow
-            status={callWindow}
-            localSrc={localSrc}
-            peerSrc={peerSrc}
-            config={this.config}
-            mediaDevice={this.pc.mediaDevice}
-            endCall={this.endCallHandler}
-          />
-        )}
-        <CallModal
-          status={callModal}
-          startCall={this.startCallHandler}
-          rejectCall={this.rejectCallHandler}
-          callFrom={callFrom}
-        />
+        {userName && <h3>Welcome, {userName}</h3>}
       </div>
-    );
-  }
-}
+      {!_.isEmpty(config) && (
+        <CallWindow
+          status={callWindow}
+          localSrc={localSrc}
+          peerSrc={peerSrc}
+          config={config}
+          mediaDevice={pc.mediaDevice}
+          endCall={endCall}
+        />
+      )}
+      <CallModal
+        status={callModal}
+        startCall={startCall}
+        rejectCall={rejectCall}
+        callFrom={callFrom}
+      />
+    </div>
+  );
+};
 
 export default App;

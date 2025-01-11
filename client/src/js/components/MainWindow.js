@@ -10,7 +10,7 @@ function useClientID(userInfo) {
 
   useEffect(() => {
     // Retrieve the username from localStorage (if it exists)
-    const username = localStorage.getItem('username') || userInfo?.name;
+    const username = localStorage.getItem('userName') || userInfo?.name;
 
     if (username) {
       setClientID(username);
@@ -38,7 +38,7 @@ function useClientID(userInfo) {
 
 function MainWindow({ startCall }) {
   const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
+  const { userInfo } = userLogin; // Get userInfo from Redux directly in the component
 
   const [clientID, updateClientID] = useClientID(userInfo);
   const [friendID, setFriendID] = useState(null);
@@ -49,7 +49,7 @@ function MainWindow({ startCall }) {
       updateClientID(userInfo.name);  // Update ID when component mounts with userInfo
       document.title = `${userInfo.name} - VideoCall`; // Ensure the document title is updated
     }
-  }, [userInfo]);  // This effect runs only on component mount
+  }, [userInfo]);  // This effect runs only on userInfo change
 
   /**
    * Start the call with or without video
