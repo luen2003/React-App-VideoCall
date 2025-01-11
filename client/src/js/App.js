@@ -22,8 +22,8 @@ const NavBar = () => {
   };
 
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-evenly', padding: '10px', background: '#f4f4f4' }}>
-      <div>
+    <nav style={{ display: 'flex', justifyContent: 'space-evenly', padding: '10px', background: '#f4f4f4', width: '120%', boxSizing: 'border-box', marginLeft:'-20px' }}>
+      <div style={{marginRight: '100px',paddingRight: '100px'}}>
         {!userInfo ? (
           <>
             <Link to="/login" style={{ margin: '0 10px' }}>Login</Link>
