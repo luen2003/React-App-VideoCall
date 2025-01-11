@@ -69,7 +69,8 @@ function MainWindow({ startCall }) {
             type="text"
             className="txt-clientId"
             value={clientID}
-            onChange={(e) => updateClientID(e.target.value)}  // Update ID when the user changes it
+            onChange={(e) => updateClientID(e.target.value)}
+            readOnly
           />
         </h3>
         <h4>Get started by calling a friend below</h4>
