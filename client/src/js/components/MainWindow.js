@@ -9,13 +9,11 @@ function useClientID(userInfo) {
   const [clientID, setClientID] = useState('');
 
   useEffect(() => {
-    // Update clientID when userInfo is available and set the document title
     if (userInfo) {
       setClientID(userInfo.name);
       document.title = `${userInfo.name} - VideoCall`;
       socket.emit('updateID', userInfo.name);  // Emit new ID to backend
     } else {
-      // For guests or unauthenticated users
       socket.on('init', ({ id }) => {
         setClientID(id);
         document.title = `${id} - VideoCall`;
@@ -43,11 +41,12 @@ function MainWindow({ startCall }) {
   const [friendID, setFriendID] = useState(null);
 
   useEffect(() => {
+    // When the component mounts, call updateClientID if userInfo exists
     if (userInfo) {
-      updateClientID(userInfo.name);
+      updateClientID(userInfo.name);  // Update ID when component mounts with userInfo
       document.title = `${userInfo.name} - VideoCall`; // Ensure the document title is updated
     }
-  }, [userInfo]);  // Update title when userInfo changes
+  }, []);  // This effect runs only on component mount
 
   /**
    * Start the call with or without video
