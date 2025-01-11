@@ -2,22 +2,24 @@ const io = require('socket.io');
 const users = require('./users'); // Assuming users is a module to manage users
 
 function initSocket(socket) {
-  let id; // Store the user ID (could be the username)
+  let id; // Store the user ID (could be the username or generated ID)
+  let newId; // For new user ID
 
   // Handle 'init' event from client: either use username or generate a new ID
   socket.on('init', async (data) => {
     if (data && data.username) {
       // If a username is passed, use it as the ID
       id = data.username;
-      newId = await users.createUser(socket, id);
-      console.log(`User connected: ${newId}`); // Log the username that is connected
+      await users.create(socket, id);  // Register the username in users.js
+      console.log(`User connected: ${id}`); // Log the username that is connected
     } else {
-      // Otherwise, create a new ID for the user
+      // Otherwise, generate a new ID for the user
+      newId = await users.create(socket);  // Create a random ID
+      users.update(newId, id);
       console.log(`User connected with generated ID: ${id}`); // Log the generated ID
     }
 
     if (id) {
-      users[id] = socket; // Register the socket for this user ID
       socket.emit('init', { id }); // Send the user ID back to the client
     } else {
       socket.emit('error', { message: 'Failed to generate user ID' });
@@ -38,34 +40,26 @@ function initSocket(socket) {
   socket.on('request', (data) => {
     const receiver = users.get(data.to);
     if (receiver) {
-      receiver.emit('request', { from: id }); // Emit the request to the receiver
+      receiver.emit('request', { from: id });
     }
-  });
-
-  // Handle outgoing calls
-  socket.on('call', (data) => {
+  })
+  .on('call', (data) => {
     const receiver = users.get(data.to);
     if (receiver) {
-      receiver.emit('call', { ...data, from: id }); // Emit the call to the receiver
+      receiver.emit('call', { ...data, from: id });
     } else {
-      socket.emit('failed'); // Emit a failure event if the receiver is not available
+      socket.emit('failed');
     }
-  });
-
-  // Handle ending a call
-  socket.on('end', (data) => {
+  })
+  .on('end', (data) => {
     const receiver = users.get(data.to);
     if (receiver) {
-      receiver.emit('end'); // Emit end to the receiver to close the call
+      receiver.emit('end');
     }
-  });
-
-  // Handle user disconnection
-  socket.on('disconnect', () => {
-    if (id) {
-      users.remove(id); // Remove the user from the users map
-      console.log(`User ${id} disconnected`); // Log the disconnection event
-    }
+  })
+  .on('disconnect', () => {
+    users.remove(id);
+    console.log(id, 'disconnected');
   });
 }
 
