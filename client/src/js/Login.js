@@ -28,22 +28,18 @@ const Login = () => {
 
   const loginContainerStyle = {
     display: 'flex',
-    width: '80%',
-    maxWidth: '1200px',
-    height: '80vh',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    padding: '0 20px',
   };
 
   const loginLeftStyle = {
     flex: 1,
-    backgroundColor: '#4CAF50',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: '8px',
-    borderBottomLeftRadius: '8px',
+    padding: '20px',
   };
 
   const loginRightStyle = {
@@ -93,6 +89,13 @@ const Login = () => {
     fontSize: '14px',
   };
 
+  // Styling for the text link (Don't have an account? Sign up)
+  const inputTextStyle = {
+    color: 'black',
+    marginTop: '10px',
+    textAlign: 'center',  // Centering the text
+  };
+
   return (
     <div style={loginContainerStyle}>
       <div style={loginLeftStyle}>
@@ -100,7 +103,7 @@ const Login = () => {
       </div>
       <div style={loginRightStyle}>
         <div style={loginFormStyle}>
-          <h3>Log In</h3>
+          <h3 style={{ color: 'black', textAlign: 'center' }}>Log In</h3>
           <form onSubmit={submitHandler}>
             <div style={inputGroupStyle}>
               <label htmlFor="email">Email</label>
@@ -128,7 +131,7 @@ const Login = () => {
               {loading ? 'Logging in...' : 'Login Now'}
             </button>
             <div style={linksStyle}>
-              <p>Don't have an account? <a href="/signup">Sign up</a></p>
+              <p style={inputTextStyle}>Don't have an account? <a href="/signup">Sign up</a></p>
             </div>
           </form>
         </div>
