@@ -12,6 +12,9 @@ const server = http.createServer(app);
 // Connect to the database
 connectDB();
 
+app.use(express.json());  // This line is crucial for parsing the request body
+
+
 // Serve static files (JS, CSS, images, etc.) directly from the dist folder
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
