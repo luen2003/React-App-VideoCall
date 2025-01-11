@@ -8,24 +8,25 @@ const users = require('./users');
 function initSocket(socket) {
   let id;
 
-  socket
-    .on('init', async () => {
-      id = await users.create(socket);
+    socket.on('init', async () => {
+      id = await users.create(socket);  // Create a random ID initially
       if (id) {
-        socket.emit('init', { id });
+        socket.emit('init', { id });  // Emit the random ID to the frontend
       } else {
-        socket.emit('error', { message: 'Failed to generating user id' });
+        socket.emit('error', { message: 'Failed to generate user ID' });
       }
-    })
-    .on('updateID', (newID) => {
-      // Cập nhật ID của người dùng
+    });
+  
+    // When the frontend sends an updateID event, use the userInfo.name instead of the random ID
+    socket.on('updateID', (newID) => {
       if (users.get(id)) {
-        users.update(id, newID); // Cập nhật ID trong danh sách người dùng
-        id = newID; // Thay đổi ID
-        socket.emit('init', { id: newID }); // Cập nhật ID trên client
+        users.update(id, newID);  // Update the user's ID in the backend
+        id = newID;  // Change the ID to the userInfo.name
+        socket.emit('init', { id: newID });  // Emit the updated ID to the frontend
       }
-    })
-    .on('request', (data) => {
+    });
+    
+    socket.on('request', (data) => {
       const receiver = users.get(data.to);
       if (receiver) {
         receiver.emit('request', { from: id });

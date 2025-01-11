@@ -3,32 +3,51 @@ import PropTypes from 'prop-types';
 import { faPhone, faVideo } from '@fortawesome/free-solid-svg-icons';
 import ActionButton from './ActionButton';
 import { socket } from '../communication';
+import { useSelector } from 'react-redux';
 
-function useClientID() {
+function useClientID(userInfo) {
   const [clientID, setClientID] = useState('');
 
   useEffect(() => {
-    socket.on('init', ({ id }) => {
-      document.title = `${id} - VideoCall`;
-      setClientID(id);
-    });
-
-    return () => {
-      socket.off('init');
-    };
-  }, []);
+    // Update clientID when userInfo is available and set the document title
+    if (userInfo) {
+      setClientID(userInfo.name);
+      document.title = `${userInfo.name} - VideoCall`;
+      socket.emit('updateID', userInfo.name);  // Emit new ID to backend
+    } else {
+      // For guests or unauthenticated users
+      socket.on('init', ({ id }) => {
+        setClientID(id);
+        document.title = `${id} - VideoCall`;
+      });
+      return () => {
+        socket.off('init');
+      };
+    }
+  }, [userInfo]);  // This effect depends on userInfo
 
   const updateClientID = (newID) => {
     setClientID(newID);
-    socket.emit('updateID', newID);  // Gửi ID mới đến server
+    document.title = `${newID} - VideoCall`;
+    socket.emit('updateID', newID);  // Send the updated ID to the server
   };
 
   return [clientID, updateClientID];
 }
 
 function MainWindow({ startCall }) {
-  const [clientID, updateClientID] = useClientID();
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
+  const [clientID, updateClientID] = useClientID(userInfo);
   const [friendID, setFriendID] = useState(null);
+
+  useEffect(() => {
+    if (userInfo) {
+      updateClientID(userInfo.name);
+      document.title = `${userInfo.name} - VideoCall`; // Ensure the document title is updated
+    }
+  }, [userInfo]);  // Update title when userInfo changes
 
   /**
    * Start the call with or without video
@@ -47,8 +66,8 @@ function MainWindow({ startCall }) {
           <input
             type="text"
             className="txt-clientId"
-            value={clientID} 
-            onChange={(e) => updateClientID(e.target.value)}  // Cập nhật ID khi người dùng thay đổi
+            value={clientID}
+            onChange={(e) => updateClientID(e.target.value)}  // Update ID when the user changes it
           />
         </h3>
         <h4>Get started by calling a friend below</h4>
