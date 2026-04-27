@@ -91,6 +91,7 @@ function MainWindow({ startCall }) {
             onBlur={(e) => updateClientID(e.target.value)}  // Update ID only on blur (or manually)
             onChange={(e) => updateClientID(e.target.value)}  
             autoFocus
+            readOnly
           />
         </h3>
         <h4>Get started by calling a friend below</h4>
