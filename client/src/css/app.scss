@@ -141,12 +141,12 @@ body {
         z-index: 10!important;
     }
     
-    /* --- Cấu hình video của bạn (dưới cùng bên phải, trên các nút) --- */
+/* --- Cấu hình video của bạn (trên cùng bên phải) --- */
     #localVideo {
         position: absolute!important;
-        bottom: 110px!important; /* Đẩy lên 110px để không bị các nút đè lên */
-        right: 20px!important;
-        top: auto!important; /* Ghi đè các thuộc tính top cũ nếu có */
+        top: 20px!important;    
+        right: 20px!important;   
+        bottom: auto!important; 
         width: 120px!important;   
         height: 160px!important;
         object-fit: cover!important; 
@@ -154,6 +154,12 @@ body {
         border: 2px solid rgba(255, 255, 255, 0.5)!important; 
         z-index: 5!important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5)!important;
+
+        /* Tùy chọn: Giúp video của mình hiển thị to hơn một chút khi xem trên PC */
+        @media screen and (min-width: 768px) {
+            width: 180px!important;
+            height: 240px!important;
+        }
     }
     
     /* --- Cấu hình video của người kia (phủ kín màn hình) --- */
