@@ -81,16 +81,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-// Import thêm faSync cho nút xoay camera
-import { faPhone, faVideo, faSync } from '@fortawesome/free-solid-svg-icons'; 
+import { faPhone, faVideo, faSync } from '@fortawesome/free-solid-svg-icons';
 import ActionButton from './ActionButton';
 
-function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall }) {
+function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall, peerConnection }) {
   const peerVideo = useRef(null);
   const localVideo = useRef(null);
   const [video, setVideo] = useState(config.video);
   const [audio, setAudio] = useState(config.audio);
-  const [isFrontCam, setIsFrontCam] = useState(true); // State lưu trạng thái camera
+  const [isFrontCam, setIsFrontCam] = useState(true);
 
   useEffect(() => {
     if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
@@ -114,23 +113,59 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
     mediaDevice.toggle(deviceType);
   };
 
-  // Hàm xử lý lật camera
-  const flipCamera = () => {
-    const newFacingMode = isFrontCam ? 'environment' : 'user';
-    setIsFrontCam(!isFrontCam);
-    
-    // Gọi hàm switchCamera (bạn cần tự viết logic WebRTC replaceTrack trong object mediaDevice)
-    if (mediaDevice && typeof mediaDevice.switchCamera === 'function') {
-      mediaDevice.switchCamera(newFacingMode);
-    } else {
-      console.warn("Bạn cần triển khai hàm switchCamera(facingMode) trong object mediaDevice để thực hiện replaceTrack WebRTC.");
+  /**
+   * Logic Lật Camera thực tế
+   */
+  const flipCamera = async () => {
+    try {
+      const newFacingMode = isFrontCam ? 'environment' : 'user';
+      
+      // 1. Tắt track video hiện tại của local camera để nhường quyền cho camera mới
+      if (localSrc) {
+        localSrc.getVideoTracks().forEach(track => track.stop());
+      }
+
+      // 2. Yêu cầu luồng stream mới với camera trước/sau
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: newFacingMode } },
+        audio: true // Giữ nguyên audio
+      });
+
+      // 3. Cập nhật lại video hiển thị trên màn hình của mình
+      if (localVideo.current) {
+        localVideo.current.srcObject = newStream;
+      }
+
+      // 4. (Quan trọng) Gửi luồng video mới sang cho người đang gọi
+      // BẠN CẦN TRUYỀN peerConnection VÀO COMPONENT NÀY THÔNG QUA PROPS
+      if (peerConnection) {
+        const videoTrack = newStream.getVideoTracks()[0];
+        const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) {
+          await sender.replaceTrack(videoTrack);
+        }
+      }
+
+      setIsFrontCam(!isFrontCam);
+    } catch (error) {
+      console.error("Lỗi khi lật camera:", error);
+      try {
+        const fallbackMode = isFrontCam ? 'environment' : 'user';
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: fallbackMode },
+          audio: true
+        });
+        if (localVideo.current) localVideo.current.srcObject = fallbackStream;
+        setIsFrontCam(!isFrontCam);
+      } catch (err) {
+        alert("Thiết bị của bạn không hỗ trợ lật camera hoặc không có camera sau.");
+      }
     }
   };
 
   return (
     <div className={classnames('call-window', status)}>
       <video id="peerVideo" ref={peerVideo} autoPlay playsInline />
-      {/* playsInline rất quan trọng trên mobile (đặc biệt iOS) để video không bật fullscreen */}
       <video id="localVideo" ref={localVideo} autoPlay muted playsInline />
       
       <div className="video-control">
@@ -146,15 +181,12 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
           disabled={!audio}
           onClick={() => toggleMediaDevice('Audio')}
         />
-        
-        {/* Nút lật camera */}
         <ActionButton
           key="btnFlip"
           icon={faSync}
-          disabled={!video} // Vô hiệu hóa nếu đang tắt video
-          onClick={flipCamera}
+          disabled={!video}
+          onClick={flipCamera} 
         />
-        
         <ActionButton
           className="hangup"
           icon={faPhone}
@@ -167,14 +199,15 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
 
 CallWindow.propTypes = {
   status: PropTypes.string.isRequired,
-  localSrc: PropTypes.object, // eslint-disable-line
-  peerSrc: PropTypes.object, // eslint-disable-line
+  localSrc: PropTypes.object,
+  peerSrc: PropTypes.object,
   config: PropTypes.shape({
     audio: PropTypes.bool.isRequired,
     video: PropTypes.bool.isRequired
   }).isRequired,
-  mediaDevice: PropTypes.object, // eslint-disable-line
-  endCall: PropTypes.func.isRequired
+  mediaDevice: PropTypes.object,
+  endCall: PropTypes.func.isRequired,
+  peerConnection: PropTypes.object 
 };
 
 export default CallWindow;
