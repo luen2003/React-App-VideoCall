@@ -41,3 +41,42 @@ body {
 @import "call-window";
 @import "call-modal";
 
+body {
+  background: rgba(#000000, 0.6)!important;
+  padding: 0px 20px 20px 20px!important;
+  min-height: 100dvh!important;
+  height: 100dvh!important;
+  overflow: hidden!important;
+}
+
+.call-window {
+    position: absolute!important;
+    top: 0!important;
+    left: 0!important;
+    width: 100vw!important;
+    height: 100dvh!important;
+    opacity: 0!important;
+    z-index: -1!important;
+    @include transition(opacity 0.5s);
+    @include bg-gradient(top, #074055 0%, #030D10 100%);
+    
+    &.active {
+        opacity: 1!important;
+        z-index: auto!important;
+        
+        .video-control {
+            z-index: 10!important; 
+        }
+    }
+    
+    .video-control {
+        position: absolute!important;
+        bottom: 20px!important;
+        height: 72px!important;
+        width: 100%!important;
+        text-align: center!important;
+        opacity: 1!important;
+        z-index: 10!important;
+    }
+    
+}
