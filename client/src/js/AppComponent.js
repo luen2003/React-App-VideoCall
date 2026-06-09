@@ -15,8 +15,14 @@ const NavBar = () => {
   // Get user login status
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-  window.location.reload();
+  useEffect(() => {
+    const hasReloaded = sessionStorage.getItem('firstReload');
 
+    if (!hasReloaded) {
+      sessionStorage.setItem('firstReload', 'true');
+      window.location.reload();
+    }
+  }, []);
   useEffect(() => {
     // Check if user is logged in and trigger reload only once
     if (userInfo && !sessionStorage.getItem('pageReloaded')) {
@@ -26,12 +32,26 @@ const NavBar = () => {
     }
   }, [userInfo]); // Trigger the effect when userInfo changes
 
+  useEffect(() => {
+    const reloaded = sessionStorage.getItem('pageReloaded');
+
+    if (userInfo && !reloaded) {
+      sessionStorage.setItem('pageReloaded', 'true');
+      window.location.reload();
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    if (!userInfo) {
+      sessionStorage.removeItem('pageReloaded');
+    }
+  }, [userInfo]);
 
   // Handle logout
   const logoutHandler = () => {
     dispatch(logout());
+    sessionStorage.removeItem('firstReload'); // Reset first reload flag on logout
     sessionStorage.removeItem('pageReloaded'); // Reset page reload flag on logout
-
   };
 
 
