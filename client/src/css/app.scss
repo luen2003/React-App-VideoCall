@@ -162,13 +162,13 @@ body {
         }
     }
     
-    /* --- Cấu hình video của người kia (phủ kín màn hình) --- */
     #peerVideo {
         position: absolute!important;
         top: 0!important;
         left: 0!important;
         width: 100%!important;
         height: 100%!important;
-        object-fit: cover!important; 
+        object-fit: contain!important; /* Thay 'cover' bằng 'contain' ở đây */
+        background-color: #000!important; /* Thêm nền đen để phần viền thừa (nếu có) trông tự nhiên hơn */
     }
 }
