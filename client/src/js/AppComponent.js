@@ -15,6 +15,7 @@ const NavBar = () => {
   // Get user login status
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+  window.location.reload();
 
   useEffect(() => {
     // Check if user is logged in and trigger reload only once
@@ -25,7 +26,7 @@ const NavBar = () => {
     }
   }, [userInfo]); // Trigger the effect when userInfo changes
 
-  
+
   // Handle logout
   const logoutHandler = () => {
     dispatch(logout());
@@ -33,7 +34,7 @@ const NavBar = () => {
 
   };
 
-  
+
 
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-evenly', padding: '10px', background: '#f4f4f4' }}>
@@ -45,7 +46,7 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <span style={{ margin: '0 10px', color:'black' }}>Hi, {userInfo.name}</span> {/* Display user name */}
+            <span style={{ margin: '0 10px', color: 'black' }}>Hi, {userInfo.name}</span> {/* Display user name */}
             <button onClick={logoutHandler} style={{ margin: '0 10px' }}>Logout</button>
           </>
         )}
@@ -72,7 +73,7 @@ class AppComponent extends Component {
     this.rejectCallHandler = this.rejectCall.bind(this);
   }
 
-  
+
 
   componentDidMount() {
     // Get the user name from localStorage or Redux store for initialization
