@@ -26,7 +26,7 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
     // Bắt đầu đếm ngược 8 giây (8000ms) để ẩn các nút
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false);
-    }, 8000);
+    }, 6000);
   };
 
   // Khởi động timer khi CallWindow trở thành 'active'
