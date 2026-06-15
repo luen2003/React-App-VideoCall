@@ -15,25 +15,29 @@
 		
 		.video-control {
 			z-index: auto;
-			@include animation(in-fadeout 3s ease);
+			// @include animation(in-fadeout 3s ease);
 		}
 	}
 	
 	.video-control {
-		position: absolute;
-		bottom: 20px;
-		height: 72px;
-		width: 100%;
-		text-align: center;
-		opacity: 0;
-		z-index: -1;
-		@include transition(opacity 0.5s);
-		
-		
-		&:hover {
-			opacity: 1;
-		}
-	}
+    position: absolute !important;
+    bottom: 20px !important;
+    height: 72px !important;
+    width: 100% !important;
+    text-align: center !important;
+    
+    /* Chỉnh sửa phần này */
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+    @include transition(opacity 0.5s ease, visibility 0.5s ease); /* Chuyển động mượt khi mờ đi */
+    
+    /* Class .hide sẽ được thêm vào bằng React khi hết 8 giây */
+    &.hide {
+      opacity: 0 !important;
+      visibility: hidden !important; /* Ẩn hoàn toàn để không vô tình bấm trúng nút */
+    }
+  }
 	
 	video {
 		position: absolute;
@@ -71,9 +75,9 @@
 		cursor: pointer;
 		transition-duration: 0.25s;
 		
-		&:hover {
-			opacity: 0.8;	
-		}
+		// &:hover {
+		// 	opacity: 1;	
+		// }
 		
 		&.hangup {
 			background-color: $red;

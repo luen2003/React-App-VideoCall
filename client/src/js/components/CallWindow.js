@@ -11,6 +11,36 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
   const [video, setVideo] = useState(config.video);
   const [audio, setAudio] = useState(config.audio);
 
+  // --- THÊM MỚI: State và Ref quản lý việc ẩn/hiện nút bấm ---
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef(null);
+
+  const resetControlsTimer = () => {
+    setShowControls(true); // Hiển thị lại nút bấm
+    
+    // Clear timeout cũ nếu có
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    
+    // Bắt đầu đếm ngược 8 giây (8000ms) để ẩn các nút
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 8000);
+  };
+
+  // Khởi động timer khi CallWindow trở thành 'active'
+  useEffect(() => {
+    if (status === 'active') {
+      resetControlsTimer();
+    }
+    // Cleanup khi unmount
+    return () => {
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    };
+  }, [status]);
+  // -----------------------------------------------------------
+
   useEffect(() => {
     if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
     if (localVideo.current && localSrc) localVideo.current.srcObject = localSrc;
@@ -24,38 +54,50 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
   });
 
   const toggleMediaDevice = (deviceType) => {
-    if (deviceType === 'Video') {
-      setVideo(!video);
-    }
-    if (deviceType === 'Audio') {
-      setAudio(!audio);
-    }
+    if (deviceType === 'Video') setVideo(!video);
+    if (deviceType === 'Audio') setAudio(!audio);
     mediaDevice.toggle(deviceType);
+    resetControlsTimer(); // Reset lại timer nếu user đang thao tác bấm nút
+  };
+
+  // Hàm xử lý khi user click vào vùng màn hình trống
+  const handleScreenClick = () => {
+    resetControlsTimer();
   };
 
   return (
-    <div className={classnames('call-window', status)}>
-      {/* playsInline giúp video không tự phóng to fullscreen trên iOS */}
+    // Thêm sự kiện onClick vào thẻ div bọc ngoài cùng
+    <div className={classnames('call-window', status)} onClick={handleScreenClick}>
       <video id="peerVideo" ref={peerVideo} autoPlay playsInline />
       <video id="localVideo" ref={localVideo} autoPlay muted playsInline />
       
-      <div className="video-control">
+      {/* Thêm class 'hide' khi showControls là false */}
+      <div className={classnames('video-control', { hide: !showControls })}>
         <ActionButton
           key="btnVideo"
           icon={faVideo}
           disabled={!video}
-          onClick={() => toggleMediaDevice('Video')}
+          onClick={(e) => {
+            e.stopPropagation(); // Ngăn việc click vào nút bị tính là click vào màn hình
+            toggleMediaDevice('Video');
+          }}
         />
         <ActionButton
           key="btnAudio"
           icon={faPhone}
           disabled={!audio}
-          onClick={() => toggleMediaDevice('Audio')}
+          onClick={(e) => {
+            e.stopPropagation(); // Ngăn click lan ra ngoài
+            toggleMediaDevice('Audio');
+          }}
         />
         <ActionButton
           className="hangup"
           icon={faPhone}
-          onClick={() => endCall(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            endCall(true);
+          }}
         />
       </div>
     </div>
