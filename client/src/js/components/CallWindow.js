@@ -44,14 +44,14 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
   useEffect(() => {
     if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
     if (localVideo.current && localSrc) localVideo.current.srcObject = localSrc;
-  });
+  }, [peerSrc, localSrc]);
 
   useEffect(() => {
     if (mediaDevice) {
       mediaDevice.toggle('Video', video);
       mediaDevice.toggle('Audio', audio);
     }
-  });
+  }, [mediaDevice, video, audio]);
 
   const toggleMediaDevice = (deviceType) => {
     if (deviceType === 'Video') setVideo(!video);
