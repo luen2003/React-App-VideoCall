@@ -11,14 +11,14 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
   const [video, setVideo] = useState(config.video);
   const [audio, setAudio] = useState(config.audio);
 
-  // --- THÊM MỚI: State và Ref quản lý việc ẩn/hiện nút bấm ---
+  // --- State và Ref quản lý việc ẩn/hiện nút bấm ---
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
   const resetControlsTimer = () => {
     setShowControls(true); // Hiển thị lại nút bấm
     
-    // Clear timeout cũ nếu có
+    // Clear timeout cũ nếu có để không bị đè
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
@@ -39,7 +39,6 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
   }, [status]);
-  // -----------------------------------------------------------
 
   useEffect(() => {
     if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
@@ -60,14 +59,18 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
     resetControlsTimer(); // Reset lại timer nếu user đang thao tác bấm nút
   };
 
-  // Hàm xử lý khi user click vào vùng màn hình trống
-  const handleScreenClick = () => {
+  // Hàm xử lý khi có tương tác từ người dùng (Click, Move, Touch)
+  const handleUserActivity = () => {
     resetControlsTimer();
   };
 
   return (
-    // Thêm sự kiện onClick vào thẻ div bọc ngoài cùng
-    <div className={classnames('call-window', status)} onClick={handleScreenClick}>
+    <div 
+      className={classnames('call-window', status)} 
+      onClick={handleUserActivity}        // Click chuột
+      onMouseMove={handleUserActivity}    // Di chuyển chuột (Desktop hover)
+      onTouchStart={handleUserActivity}   // Chạm màn hình (Mobile)
+    >
       <video id="peerVideo" ref={peerVideo} autoPlay playsInline />
       <video id="localVideo" ref={localVideo} autoPlay muted playsInline />
       
@@ -87,7 +90,7 @@ function CallWindow({ peerSrc, localSrc, config, mediaDevice, status, endCall })
           icon={faPhone}
           disabled={!audio}
           onClick={(e) => {
-            e.stopPropagation(); // Ngăn click lan ra ngoài
+            e.stopPropagation();
             toggleMediaDevice('Audio');
           }}
         />
