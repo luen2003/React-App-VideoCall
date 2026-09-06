@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { register } from './actions/userActions';
 import { useNavigate } from 'react-router-dom';
+import avatarImage from '../../../client/avatar.png'
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -120,7 +121,7 @@ const SignUp = () => {
       <div style={registerContainerStyle} className="signup-container">
         <div style={imageSectionStyle} className="signup-left">
           <img
-            src="https://avatars.githubusercontent.com/u/185040659?v=4"
+            src={avatarImage}
             alt="Sign Up"
             style={{ width: '100%', height: 'auto', maxWidth: '400px', borderRadius: '8px' }}
           />

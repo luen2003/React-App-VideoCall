@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from './actions/userActions'; // Assuming the action for login
-
+import avatarImage from '../../../client/avatar.png'
 const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ const Login = () => {
   return (
     <div style={loginContainerStyle}>
       <div style={loginLeftStyle}>
-        <img src="https://avatars.githubusercontent.com/u/185040659?v=4" alt="Login" style={{ width: '80%', height: 'auto', borderRadius: '8px' }} />
+        <img src={avatarImage} alt="Login" style={{ width: '80%', height: 'auto', borderRadius: '8px' }} />
       </div>
       <div style={loginRightStyle}>
         <div style={loginFormStyle}>
