@@ -1,6 +1,6 @@
 # Voice or Video Call Using WebRTC
 
-A real-time **voice and video calling application** built with **WebRTC**, enabling users to communicate directly through their browsers without requiring external plugins.
+A real-time **voice and video calling application** built with **WebRTC**, enabling users to communicate directly through their browsers.
 
 ## Overview
 
