@@ -23,22 +23,8 @@ WebRTC handles the real-time audio and video transmission, while a signaling mec
 ### Voice Call
 
 - Real-time audio communication
-- Microphone mute/unmute
-- Call start/end controls
 
 ### Video Call
 
 - Real-time video communication
-- Camera enable/disable
-- Local video preview
-- Remote video display
-
-### WebRTC
-
-- Peer-to-peer communication
-- RTCPeerConnection
-- MediaStream
-- SDP offer/answer exchange
-- ICE candidate exchange
-- STUN/TURN support
 
