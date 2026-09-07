@@ -22,9 +22,9 @@ WebRTC handles the real-time audio and video transmission, while a signaling mec
 
 ### Voice Call
 
-- Real-time audio communication
+Real-time audio communication
 
 ### Video Call
 
-- Real-time video communication
+Real-time video communication
 
