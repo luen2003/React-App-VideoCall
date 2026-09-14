@@ -4,36 +4,32 @@ import { faPhone, faVideo } from '@fortawesome/free-solid-svg-icons';
 import ActionButton from './ActionButton';
 import { socket } from '../communication';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 function useClientID(userInfo) {
   const [clientID, setClientID] = useState('');
 
   useEffect(() => {
     if (userInfo && userInfo.name) {
-      // Use the user's name as the client ID
       setClientID(userInfo.name);
       document.title = `${userInfo.name} - VideoCall`;
-      // Emit the initial ID to the backend
-      socket.emit('init', { name: userInfo.name });  // Emit with the user's name
+      socket.emit('init', { name: userInfo.name });
     } else {
-      // For guests or users without a name, wait for a random ID from the server
       socket.on('init', ({ id }) => {
         setClientID(id);
         document.title = `${id} - VideoCall`;
       });
 
-      // Cleanup the socket listener
       return () => {
         socket.off('init');
       };
     }
-  }, [userInfo]);  // Ensure this runs only when `userInfo` changes
+  }, [userInfo]);
 
-  // Function to manually update the client ID
   const updateClientID = (newID) => {
     setClientID(newID);
     document.title = `${newID} - VideoCall`;
-    socket.emit('updateID', newID);  // Notify the server of the new ID
+    socket.emit('updateID', newID);
   };
 
   return [clientID, updateClientID];
@@ -44,39 +40,53 @@ function MainWindow({ startCall }) {
   const { userInfo } = userLogin;
 
   const [clientID, updateClientID] = useClientID(userInfo);
-  const [friendID, setFriendID] = useState(null);
+  const [friendID, setFriendID] = useState(''); 
+  const [users, setUsers] = useState([]); 
+  const [searchTerm, setSearchTerm] = useState(''); 
+  
+  // State mới để điều khiển việc ẩn/hiện danh sách
+  const [isListVisible, setIsListVisible] = useState(false); 
 
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Focus the input element when the component is mounted
     inputRef.current?.focus();
-  }, []);
+    
+    const fetchUsers = async () => {
+      try {
+        const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
+        const { data } = await axios.get('/api/users', config);
+        
+        const filteredList = data.filter(u => u.name !== userInfo?.name);
+        setUsers(filteredList);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách người dùng:", error);
+      }
+    };
 
-    // Log client ID and friend ID changes
+    fetchUsers();
+  }, [userInfo]);
+
   useEffect(() => {
     if (userInfo) {
       updateClientID(userInfo.name);
     }
-    console.log('Client ID updated:', clientID);
-  }, [clientID]);  // Log client ID changes
+  }, [clientID]);
 
-  useEffect(() => {
-    console.log('Friend ID updated:', friendID);
-  }, [friendID]);  // Log friend ID changes
-
-  /**
-   * Start a call with or without video
-   * @param {Boolean} video - Whether the call should have video
-   */
   const callWithVideo = (video) => {
     const config = { audio: true, video };
     return () => {
       if (friendID) {
         startCall(true, friendID, config, clientID);
+      } else {
+        alert('Vui lòng chọn một người bạn từ danh sách để gọi.');
       }
     };
   };
+
+  const filteredUsers = users.filter((user) => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container main-window">
@@ -84,28 +94,60 @@ function MainWindow({ startCall }) {
         <h3>
           Hi, your ID is
           <input
-            ref={inputRef}  // Reference to the input element
+            ref={inputRef}
             type="text"
             className="txt-clientId"
-            defaultValue={clientID}  // Use defaultValue to avoid controlled component issues
-            onBlur={(e) => updateClientID(e.target.value)}  // Update ID only on blur (or manually)
-            onChange={(e) => updateClientID(e.target.value)}  
+            defaultValue={clientID}
+            onBlur={(e) => updateClientID(e.target.value)}
+            onChange={(e) => updateClientID(e.target.value)}
             autoFocus
             readOnly
           />
         </h3>
         <h4>Get started by calling a friend below</h4>
       </div>
-      <div>
+      
+      <div className="friend-selector">
         <input
           type="text"
-          className="txt-clientId"
+          className="txt-clientId search-input"
           spellCheck={false}
-          placeholder="Your friend ID"
-          onChange={(event) => {setFriendID(event.target.value);updateClientID(clientID);}}
-          onBlur={(event) => {setFriendID(event.target.value);updateClientID(clientID);}}
+          placeholder="Search friend by name..."
+          value={searchTerm}
+          onFocus={() => setIsListVisible(true)} // Hiển thị list khi click vào ô input
+          onBlur={() => setIsListVisible(false)} // Ẩn list khi click ra ngoài
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setFriendID(''); // Xóa friendID nếu user gõ text mới
+            setIsListVisible(true);
+          }}
         />
-        <div>
+        
+        {/* Chỉ render danh sách khi isListVisible là true */}
+        {isListVisible && (
+          <ul className="user-list">
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <li 
+                  key={user._id} 
+                  className={`user-item ${friendID === user.name ? 'selected' : ''}`}
+                  // Dùng onMouseDown thay vì onClick để bắt event trước khi input bị onBlur
+                  onMouseDown={() => {
+                    setFriendID(user.name);
+                    setSearchTerm(user.name); // Điền luôn tên vào ô input
+                    setIsListVisible(false); // Ẩn danh sách
+                  }} 
+                >
+                  {user.name}
+                </li>
+              ))
+            ) : (
+              <li className="no-results">No users found</li>
+            )}
+          </ul>
+        )}
+        
+        <div className="action-buttons">
           <ActionButton icon={faVideo} onClick={callWithVideo(true)} />
           <ActionButton icon={faPhone} onClick={callWithVideo(false)} />
         </div>

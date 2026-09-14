@@ -1,14 +1,10 @@
 const asyncHandler = require('express-async-handler');
-const User = require('../models/userModels.js'); // Import the User model
-const generateToken = require('../utils/generateToken.js'); // Import JWT generation utility
+const User = require('../models/userModels.js');
+const generateToken = require('../utils/generateToken.js');
 
-// @desc    Authenticate user & get token
-// @route   POST /api/users/login
-// @access  Public
+// Login
 const authUser = asyncHandler(async (req, res) => {
   const { name, password } = req.body;
-
-  // Find the user by name
   const user = await User.findOne({ name });
 
   if (!user) {
@@ -16,12 +12,11 @@ const authUser = asyncHandler(async (req, res) => {
     throw new Error('Invalid name or password');
   }
 
-  // Check if the password is correct
   if (await user.matchPassword(password)) {
     res.json({
       _id: user._id,
       name: user.name,
-      token: generateToken(user._id), // Send token upon successful login
+      token: generateToken(user._id),
     });
   } else {
     res.status(401);
@@ -29,12 +24,9 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
+// Register
 const registerUser = asyncHandler(async (req, res) => {
   const { name, password } = req.body;
-
   const userExists = await User.findOne({ name });
 
   if (userExists) {
@@ -42,16 +34,13 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  const user = await User.create({
-    name,
-    password,
-  });
+  const user = await User.create({ name, password });
 
   if (user) {
     res.status(201).json({
       _id: user._id,
       name: user.name,
-      token: generateToken(user._id), // Send token upon successful registration
+      token: generateToken(user._id),
     });
   } else {
     res.status(400);
@@ -59,4 +48,17 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports =  { authUser, registerUser };
+// Get all users
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({})
+    .select('_id name')
+    .sort({ name: 1 });
+
+  res.json(users);
+});
+
+module.exports = {
+  authUser,
+  registerUser,
+  getUsers,
+};

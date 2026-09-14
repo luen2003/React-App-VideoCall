@@ -74,7 +74,7 @@ const Login = () => {
   const buttonStyle = {
     width: '100%',
     padding: '12px',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#007bff', // Đổi sang xanh dương
     color: 'white',
     border: 'none',
     borderRadius: '5px',
@@ -93,10 +93,38 @@ const Login = () => {
     textAlign: 'center',  // Centering the text
   };
 
+  const linkActionStyle = {
+    color: '#007bff', // Màu xanh dương
+    textDecoration: 'none', // Bỏ gạch chân
+  };
+
   return (
     <>
       <style>
         {`
+          /* Nút trở về trang chủ */
+          .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #007bff; /* Nền xanh dương */
+            color: #fff; /* Chữ trắng */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+          }
+
+          .back-btn:hover {
+            background-color: #007bff; 
+            color: #fff;
+          }
+
           /* Mobile responsiveness */
           @media (max-width: 768px) {
             .login-container {
@@ -114,6 +142,11 @@ const Login = () => {
           }
         `}
       </style>
+
+      {/* Nút Back */}
+      <button className="back-btn" onClick={() => navigate('/')}>
+        &larr; Trở về trang chủ
+      </button>
 
       <div style={loginContainerStyle} className="login-container">
         <div style={loginLeftStyle} className="login-left">
@@ -147,10 +180,12 @@ const Login = () => {
               />
             </div>
             <button type="submit" style={buttonStyle} disabled={loading}>
-              {loading ? 'Logging in...' : 'Login Now'}
+              {loading ? 'Logging in...' : 'Login'} {/* Đổi chữ */}
             </button>
             <div style={linksStyle}>
-              <p style={inputTextStyle}>Don't have an account? <a href="/signup">Sign up</a></p>
+              <p style={inputTextStyle}>
+                Don't have an account? <a href="/signup" style={linkActionStyle}>Sign up</a>
+              </p>
             </div>
           </form>
         </div>

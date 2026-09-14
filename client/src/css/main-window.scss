@@ -1,47 +1,116 @@
 .main-window {
-	padding-top: 80px;
-	font-size: 1.75em;
+    padding-top: 80px;
+    font-size: 1.75em;
 
-	@media screen and (max-width: 767px) {
-		padding-top: 40px;
+    @media screen and (max-width: 767px) {
+        padding-top: 40px;
 
-		.pull-left, .pull-right {
-			width: 100%;
-			text-align: center;
-		}
+        .pull-left, .pull-right {
+            width: 100%;
+            text-align: center;
+        }
 
-		.pull-right {
-			margin-top: 20px;
-		}
-	}
+        .pull-right {
+            margin-top: 20px;
+        }
+    }
 
-	.btn-action {
-		$height: 60px;
-		height: $height;
-		width: $height;
-		margin: 20px 30px 0px 0px;
-		text-align: center;
-		border-radius: 50%;
-		border: solid 2px $main-color;
-		cursor: pointer;
-		transition-duration: 0.25s;
-		background-color: transparent;
+    .btn-action {
+        $height: 60px;
+        height: $height;
+        width: $height;
+        margin: 20px 30px 0px 0px;
+        text-align: center;
+        border-radius: 50%;
+        border: solid 2px $main-color;
+        cursor: pointer;
+        transition-duration: 0.25s;
+        background-color: transparent;
 
-		&:hover {
-			background-color: rgba($main-color, 0.2);
-		}
-	}
+        &:hover {
+            background-color: rgba($main-color, 0.2);
+        }
+    }
 
-	.txt-clientId {
-		height: 40px;
-		margin: 40px auto 0px 10px;
-		color: $main-color;
-		font-size: 0.9em;
-		background-color: transparent;
-		border: none;
-		border-bottom: solid 1px $main-color;
-		@include input-placeholder(rgba($main-color, 0.8));
-	}
+    .txt-clientId {
+        height: 40px;
+        margin: 40px auto 0px 10px;
+        color: $main-color;
+        font-size: 0.9em;
+        background-color: transparent;
+        border: none;
+        border-bottom: solid 1px $main-color;
+        @include input-placeholder(rgba($main-color, 0.8));
+        outline: none; // Thêm outline none để input đẹp hơn khi focus
+    }
 
+    /* === KHU VỰC THÊM MỚI CHO SEARCH LIST === */
+    .friend-selector {
+        width: 100%;
+        max-width: 500px;
+        margin-top: 20px;
+
+        .search-input {
+            width: 100%; // Kéo dài ô search 
+            margin: 20px 0 0 0;
+            padding: 0 10px;
+        }
+
+        .user-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba($main-color, 0.4);
+            border-radius: 8px;
+            font-size: 0.6em; /* Scale text nhỏ lại so với 1.75em của box ngoài */
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            
+            /* Tùy chỉnh thanh cuộn (scrollbar) cho đẹp */
+            &::-webkit-scrollbar {
+                width: 6px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background-color: rgba($main-color, 0.5);
+                border-radius: 4px;
+            }
+
+            .user-item {
+                padding: 12px 15px;
+                cursor: pointer;
+                color: #333;
+                border-bottom: 1px solid rgba($main-color, 0.1);
+                transition: background-color 0.2s, color 0.2s;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:hover {
+                    background-color: rgba($main-color, 0.1);
+                }
+
+                /* Trạng thái khi được chọn */
+                &.selected {
+                    background-color: $main-color;
+                    color: #fff;
+                    font-weight: bold;
+                }
+            }
+
+            .no-results {
+                padding: 12px 15px;
+                text-align: center;
+                color: #999;
+                font-style: italic;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-start;
+        }
+    }
 }
-
